@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - {{ app_name }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-university"></i> {{ app_name }} Admin</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active">
+                    <a href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#applications" onclick="loadApplications()">
+                        <i class="fas fa-file-alt"></i> Applications
+                    </a>
+                </li>
+                <li>
+                    <a href="#reports">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="#settings">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('index') }}">
+                        <i class="fas fa-home"></i> Back to Site
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-left">
+                    <h1>Dashboard</h1>
+                    <p>Welcome to the admin dashboard</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ stats.total_applications }}</h3>
+                            <p>Total Applications</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card pending">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ stats.pending_applications }}</h3>
+                            <p>Pending Review</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card approved">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ stats.approved_applications }}</h3>
+                            <p>Approved</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rejected">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ stats.rejected_applications }}</h3>
+                            <p>Rejected</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card amount">
+                        <div class="stat-icon">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ stats.total_loan_amount | currency }}</h3>
+                            <p>Total Loan Amount</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Applications -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Recent Applications</h2>
+                        <button class="btn btn-primary" onclick="loadApplications()">
+                            <i class="fas fa-list"></i> View All
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="applications-table">
+                            <thead>
+                                <tr>
+                                    <th>Application ID</th>
+                                    <th>Applicant</th>
+                                    <th>Loan Amount</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in recent_applications %}
+                                <tr>
+                                    <td>
+                                        <span class="app-id">{{ application.application_id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="applicant-info">
+                                            <strong>{{ application.first_name }} {{ application.last_name }}</strong>
+                                            <small>{{ application.email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="amount">{{ application.loan_amount | currency }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="purpose">{{ application.loan_purpose.replace('_', ' ').title() }}</span>
+                                    </td>
+                                    <td>
+                                        {{ application.status | status_badge | safe }}
+                                    </td>
+                                    <td>
+                                        <span class="date">{{ application.created_at | date }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-info" onclick="viewApplication('{{ application.application_id }}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-success" onclick="updateStatus('{{ application.application_id }}', 'approved')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="updateStatus('{{ application.application_id }}', 'rejected')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Application Status Distribution</h3>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Monthly Applications</h3>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Application Details</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Application details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Application Status</h2>
+                <span class="close" onclick="closeStatusModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <input type="hidden" id="statusAppId" name="app_id">
+                    <div class="form-group">
+                        <label for="newStatus">New Status:</label>
+                        <select id="newStatus" name="status" class="form-control" required>
+                            <option value="pending">Pending</option>
+                            <option value="under_review">Under Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="statusComment">Comment (Optional):</label>
+                        <textarea id="statusComment" name="comment" class="form-control" rows="3" placeholder="Add any comments about this status change..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Admin Dashboard JavaScript
+        class AdminDashboard {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.initCharts();
+                this.initEventListeners();
+                this.loadDashboardData();
+            }
+
+            initCharts() {
+                // Status Distribution Chart
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Approved', 'Rejected', 'Under Review'],
+                        datasets: [{
+                            data: [
+                                {{ stats.pending_applications }},
+                                {{ stats.approved_applications }},
+                                {{ stats.rejected_applications }},
+                                {{ stats.total_applications - stats.pending_applications - stats.approved_applications - stats.rejected_applications }}
+                            ],
+                            backgroundColor: [
+                                '#ffc107',
+                                '#28a745',
+                                '#dc3545',
+                                '#17a2b8'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+
+                // Monthly Applications Chart (placeholder data)
+                const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+                new Chart(monthlyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Applications',
+                            data: [12, 19, 15, 25, 22, 30],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            initEventListeners() {
+                // Status update form
+                document.getElementById('statusUpdateForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitStatusUpdate();
+                });
+
+                // Close modals when clicking outside
+                window.addEventListener('click', (e) => {
+                    const applicationModal = document.getElementById('applicationModal');
+                    const statusModal = document.getElementById('statusModal');
+                    
+                    if (e.target === applicationModal) {
+                        this.closeModal();
+                    }
+                    if (e.target === statusModal) {
+                        this.closeStatusModal();
+                    }
+                });
+            }
+
+            loadDashboardData() {
+                // Refresh dashboard data periodically
+                setInterval(() => {
+                    this.refreshStats();
+                }, 30000); // Refresh every 30 seconds
+            }
+
+            refreshStats() {
+                fetch('/api/dashboard-stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.updateStatsCards(data.stats);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error refreshing stats:', error);
+                    });
+            }
+
+            updateStatsCards(stats) {
+                // Update stat cards with new data
+                document.querySelector('.stat-card:nth-child(1) h3').textContent = stats.total_applications;
+                document.querySelector('.stat-card:nth-child(2) h3').textContent = stats.pending_applications;
+                document.querySelector('.stat-card:nth-child(3) h3').textContent = stats.approved_applications;
+                document.querySelector('.stat-card:nth-child(4) h3').textContent = stats.rejected_applications;
+            }
+
+            submitStatusUpdate() {
+                const appId = document.getElementById('statusAppId').value;
+                const status = document.getElementById('newStatus').value;
+                const comment = document.getElementById('statusComment').value;
+
+                fetch(`/admin/update-status/${appId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: status,
+                        comment: comment
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.showNotification('Status updated successfully!', 'success');
+                        this.closeStatusModal();
+                        location.reload(); // Refresh the page to show updated data
+                    } else {
+                        this.showNotification(data.error || 'Error updating status', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.showNotification('Error updating status', 'error');
+                });
+            }
+
+            showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    <span>${message}</span>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            closeModal() {
+                document.getElementById('applicationModal').style.display = 'none';
+            }
+
+            closeStatusModal() {
+                document.getElementById('statusModal').style.display = 'none';
+            }
+        }
+
+        // Global functions for button clicks
+        function viewApplication(appId) {
+            fetch(`/admin/application/${appId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalBody').innerHTML = html;
+                    document.getElementById('applicationModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading application:', error);
+                    alert('Error loading application details');
+                });
+        }
+
+        function updateStatus(appId, status) {
+            document.getElementById('statusAppId').value = appId;
+            document.getElementById('newStatus').value = status;
+            document.getElementById('statusModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('applicationModal').style.display = 'none';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        function loadApplications() {
+            // Redirect to applications page or load applications view
+            window.location.href = '#applications';
+            // In a real implementation, you would load the applications view here
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminDashboard = new AdminDashboard();
+        });
+    </script>
+</body>
+</html>

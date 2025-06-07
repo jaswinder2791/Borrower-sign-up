@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status - LoanPro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #007bff;
+        }
+        
+        .header h1 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .status-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .status-pending { background: #ffc107; color: #856404; }
+        .status-under_review { background: #17a2b8; color: white; }
+        .status-approved { background: #28a745; color: white; }
+        .status-rejected { background: #dc3545; color: white; }
+        
+        .application-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .eligibility-section {
+            background: #e7f3ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .eligibility-section h3 {
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .eligibility-meter {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .eligibility-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+        
+        .eligibility-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .eligibility-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .eligibility-item .score {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .eligibility-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .timeline {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item {
+            border-left: 3px solid #007bff;
+            padding-left: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: #007bff;
+            border-radius: 50%;
+        }
+        
+        .timeline-date {
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .timeline-event {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .application-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if application %}
+        <div class="header">
+            <h1>📋 Application Status</h1>
+            <p>Application ID: <strong>{{ application.application_id }}</strong></p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="status-card">
+            <div class="status-badge status-{{ application.status }}">
+                {{ application.status.replace('_', ' ').title() }}
+            </div>
+            <h2>{{ application.first_name }} {{ application.last_name }}</h2>
+            <p>Your loan application is currently <strong>{{ application.status.replace('_', ' ').title() }}</strong></p>
+        </div>
+
+        <!-- Application Details -->
+        <div class="application-details">
+            <div class="detail-card">
+                <div class="detail-label">Loan Amount</div>
+                <div class="detail-value">₹{{ "{:,.2f}".format(application.loan_amount) }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Annual Income</div>
+                <div class="detail-value">₹{{ "{:,.2f}".format(application.annual_income) }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Employment Status</div>
+                <div class="detail-value">{{ application.employment_status.replace('_', ' ').title() }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Loan Purpose</div>
+                <div class="detail-value">{{ application.loan_purpose.replace('_', ' ').title() }}</div>
+            </div>
+        </div>
+
+        <!-- Eligibility Assessment -->
+        {% if application.eligibility %}
+        <div class="eligibility-section">
+            <h3>📊 Eligibility Assessment</h3>
+            <p style="text-align: center; margin-bottom: 10px;">
+                <strong>Overall Eligibility Score: {{ "{:.1f}".format(application.eligibility.percentage) }}%</strong>
+            </p>
+            
+            <div class="eligibility-meter">
+                <div class="eligibility-fill" 
+                     style="width: {{ application.eligibility.percentage }}%; 
+                            background: {% if application.eligibility.percentage >= 70 %}#28a745{% elif application.eligibility.percentage >= 50 %}#ffc107{% else %}#dc3545{% endif %};">
+                    {{ "{:.1f}".format(application.eligibility.percentage) }}%
+                </div>
+            </div>
+            
+            <div class="eligibility-details">
+                <div class="eligibility-item">
+                    <div class="score">{{ "{:.0f}".format(application.eligibility.age_score) }}%</div>
+                    <div class="label">Age Score</div>
+                </div>
+                <div class="eligibility-item">
+                    <div class="score">{{ "{:.0f}".format(application.eligibility.income_score) }}%</div>
+                    <div class="label">Income Score</div>
+                </div>
+                <div class="eligibility-item">
+                    <div class="score">{{ "{:.0f}".format(application.eligibility.employment_score) }}%</div>
+                    <div class="label">Employment Score</div>
+                </div>
+                <div class="eligibility-item">
+                    <div class="score">{{ "{:.0f}".format(application.eligibility.loan_ratio_score) }}%</div>
+                    <div class="label">Loan Ratio Score</div>
+                </div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 15px; font-weight: bold; color: #007bff;">
+                Status: {{ application.eligibility.status.replace('_', ' ').title() }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Timeline -->
+        <div class="timeline">
+            <h3>📅 Application Timeline</h3>
+            <div class="timeline-item">
+                <div class="timeline-date">{{ application.created_at.strftime('%d %B %Y at %I:%M %p') }}</div>
+                <div class="timeline-event">Application submitted</div>
+            </div>
+            {% if application.updated_at != application.created_at %}
+            <div class="timeline-item">
+                <div class="timeline-date">{{ application.updated_at.strftime('%d %B %Y at %I:%M %p') }}</div>
+                <div class="timeline-event">Status updated to {{ application.status.replace('_', ' ').title() }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Status-specific messages -->
+        {% if application.status == 'pending' %}
+        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #856404; margin-bottom: 10px;">⏳ Application Under Review</h4>
+            <p style="color: #856404;">Your application is currently being reviewed by our team. We'll update you soon!</p>
+        </div>
+        {% elif application.status == 'under_review' %}
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #0c5460; margin-bottom: 10px;">🔍 Detailed Review in Progress</h4>
+            <p style="color: #0c5460;">Our underwriting team is conducting a detailed review of your application.</p>
+        </div>
+        {% elif application.status == 'approved' %}
+        <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #155724; margin-bottom: 10px;">🎉 Congratulations! Application Approved</h4>
+            <p style="color: #155724;">Your loan application has been approved. Our team will contact you soon with next steps.</p>
+        </div>
+        {% elif application.status == 'rejected' %}
+        <div style="background: #f8d7da; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #721c24; margin-bottom: 10px;">❌ Application Not Approved</h4>
+            <p style="color: #721c24;">Unfortunately, we cannot approve your loan application at this time. You may reapply after 30 days.</p>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Application not found -->
+        <div class="header">
+            <h1>❌ Application Not Found</h1>
+        </div>
+        
+        <div style="text-align: center; padding: 40px;">
+            <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
+                We couldn't find an application with the provided ID.
+            </p>
+            <p style="color: #666; margin-bottom: 30px;">
+                Please check your Application ID and try again, or contact our support team if you need assistance.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="btn">🏠 Back to Home</a>
+            {% if not application %}
+            <a href="{{ url_for('check_status') }}" class="btn btn-secondary">🔍 Try Again</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html></body>
+</html>
